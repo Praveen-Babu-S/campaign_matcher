@@ -1,19 +1,23 @@
-package campaignmapper
+package mapper
 
 import (
 	"campaigns/models"
 	"strings"
 )
 
-type SimpleCampaignMatcher struct{}
+type CampaignMapper interface {
+	Match(req models.DeliveryRequest, campaigns map[string]models.Campaign, rules map[string]models.TargetingRule) []models.DeliveryResponse
+}
 
-// NewSimpleCampaignMatcher creates a new SimpleCampaignMatcher.
-func NewSimpleCampaignMatcher() *SimpleCampaignMatcher {
-	return &SimpleCampaignMatcher{}
+type SimpleCampaignMapper struct{}
+
+// NewSimpleCampaignMapper creates a new SimpleCampaignMapper.
+func NewSimpleCampaignMapper() *SimpleCampaignMapper {
+	return &SimpleCampaignMapper{}
 }
 
 // Match performs the campaign matching operation.
-func (m *SimpleCampaignMatcher) Match(req models.DeliveryRequest, campaigns map[string]models.Campaign, rules map[string]models.TargetingRule) []models.DeliveryResponse {
+func (m *SimpleCampaignMapper) Match(req models.DeliveryRequest, campaigns map[string]models.Campaign, rules map[string]models.TargetingRule) []models.DeliveryResponse {
 	var matchedCampaigns []models.DeliveryResponse
 
 	for campaignID, campaign := range campaigns {

@@ -1,6 +1,8 @@
 package main
 
+import internal "campaigns/pkg"
+
 func main() {
 	// start campaigns server
-	StartCampaignsServer()
+	internal.StartCampaignsServer()
 }

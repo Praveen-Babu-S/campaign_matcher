@@ -2,21 +2,26 @@ package delivery
 
 import (
 	"campaigns/models"
-	"campaigns/pkg/campaignsfetcher"
+	"campaigns/pkg/mapper"
+	"campaigns/pkg/rules"
 	"context"
 	"log"
 	"time"
 )
 
+type DeliveryService interface {
+	GetCampaigns(ctx context.Context, req models.DeliveryRequest) ([]models.DeliveryResponse, error)
+}
+
 // DeliveryServiceImpl implements the DeliveryService interface.
 type DeliveryServiceImpl struct {
-	dataFetcher     campaignsfetcher.DataFetcher
-	campaignMatcher campaignsfetcher.CampaignMatcher
+	dataFetcher     rules.DataFetcher
+	campaignMatcher mapper.CampaignMapper
 	campaignStore   *models.CampaignStore // In-memory store
 }
 
 // NewDeliveryService creates a new DeliveryServiceImpl.
-func NewDeliveryService(dataFetcher campaignsfetcher.DataFetcher, campaignMatcher campaignsfetcher.CampaignMatcher) *DeliveryServiceImpl {
+func NewDeliveryService(dataFetcher rules.DataFetcher, campaignMatcher mapper.CampaignMapper) *DeliveryServiceImpl {
 	ds := &DeliveryServiceImpl{
 		dataFetcher:     dataFetcher,
 		campaignMatcher: campaignMatcher,

@@ -1,4 +1,4 @@
-package campaignsfetcher
+package rules
 
 import (
 	"campaigns/models"
@@ -7,7 +7,6 @@ import (
 
 type InMemoryDataFetcher struct{}
 
-// NewInMemoryDataFetcher creates a new InMemoryDataFetcher.
 func NewInMemoryDataFetcher() *InMemoryDataFetcher {
 	return &InMemoryDataFetcher{}
 }
