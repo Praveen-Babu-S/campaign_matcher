@@ -1,6 +1,10 @@
 package internal
 
 import (
+	"campaigns/handlers"
+	"campaigns/pkg/delivery"
+	"campaigns/pkg/mapper"
+	"campaigns/pkg/rules"
 	"log"
 	"net/http"
 	"time"
@@ -9,15 +13,14 @@ import (
 )
 
 func StartCampaignsServer() {
-	// Initialize components
-	dataFetcher := NewInMemoryDataFetcher()
-	campaignMatcher := NewSimpleCampaignMatcher()
-	deliveryService := NewDeliveryService(dataFetcher, campaignMatcher)
-	deliveryHandler := NewDeliveryHTTPHandler(deliveryService)
+	dataFetcher := rules.NewInMemoryDataFetcher()
+	campaignMapper := mapper.NewSimpleCampaignMapper()
+	deliveryService := delivery.NewDeliveryService(dataFetcher, campaignMapper)
+	campaignsHandler := handlers.NewCampaignsHTTPHandler(deliveryService)
 
 	// Set up HTTP server
 	router := mux.NewRouter()
-	router.HandleFunc("/v1/delivery", deliveryHandler).Methods(http.MethodGet)
+	router.HandleFunc("/v1/delivery", campaignsHandler.FetchCampaigns).Methods(http.MethodGet)
 
 	server := &http.Server{
 		Addr:         ":8080",
