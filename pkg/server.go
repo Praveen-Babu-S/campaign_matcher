@@ -19,7 +19,7 @@ func StartCampaignsServer(port string) {
 	// campaign mapper to get relevant campaigns for req
 	mapper := mapper.NewCampaignMapper(cache)
 	// http handler layer
-	campaignsHandler := handlers.NewCampaignsHTTPHandler(repo, mapper)
+	campaignsHandler := handlers.NewCampaignsHTTPHandler(mapper)
 
 	log.Println("repos initialisations are completed....")
 	router := mux.NewRouter()

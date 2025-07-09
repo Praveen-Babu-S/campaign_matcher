@@ -12,11 +12,11 @@ type ICampaignMapper interface {
 }
 
 type CampaignMapper struct {
-	Cache *cache.CampsignCacher
+	Cache cache.ICacher
 }
 
 // NewCampaignMapper creates a new CampaignMapper.
-func NewCampaignMapper(cache *cache.CampsignCacher) ICampaignMapper {
+func NewCampaignMapper(cache cache.ICacher) ICampaignMapper {
 	return &CampaignMapper{
 		Cache: cache,
 	}
@@ -25,7 +25,7 @@ func NewCampaignMapper(cache *cache.CampsignCacher) ICampaignMapper {
 func (m *CampaignMapper) GetTargetedCampaigns(ctx context.Context, req models.DeliveryRequest) []models.DeliveryResponse {
 	matchedCampaigns := []models.DeliveryResponse{}
 
-	activeCampaigns := m.Cache.Cache.ActiveCampaignIds
+	activeCampaigns := m.Cache.GetActiveCampaignIds()
 	for _, campaignID := range activeCampaigns {
 		campaign, f1 := m.Cache.GetCampaign(campaignID)
 		rule, f2 := m.Cache.GetRules(campaignID)

@@ -2,20 +2,17 @@ package handlers
 
 import (
 	"campaigns/pkg/mapper"
-	"campaigns/pkg/repository"
 	"encoding/json"
 	"log"
 	"net/http"
 )
 
 type CampaignsHTTPHandler struct {
-	repo   repository.Repository
 	mapper mapper.ICampaignMapper
 }
 
-func NewCampaignsHTTPHandler(repo repository.Repository, mapper mapper.ICampaignMapper) *CampaignsHTTPHandler {
+func NewCampaignsHTTPHandler(mapper mapper.ICampaignMapper) *CampaignsHTTPHandler {
 	return &CampaignsHTTPHandler{
-		repo:   repo,
 		mapper: mapper,
 	}
 }
