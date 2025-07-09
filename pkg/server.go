@@ -1,37 +1,32 @@
-package internal
+package campaigns
 
 import (
-	"campaigns/handlers"
-	"campaigns/pkg/delivery"
+	"campaigns/pkg/cache"
+	"campaigns/pkg/handlers"
 	"campaigns/pkg/mapper"
-	"campaigns/pkg/rules"
+	"campaigns/pkg/repository"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 )
 
-func StartCampaignsServer() {
-	dataFetcher := rules.NewInMemoryDataFetcher()
-	campaignMapper := mapper.NewSimpleCampaignMapper()
-	deliveryService := delivery.NewDeliveryService(dataFetcher, campaignMapper)
-	campaignsHandler := handlers.NewCampaignsHTTPHandler(deliveryService)
+func StartCampaignsServer(port string) {
+	// data store layer
+	repo := repository.NewDataStore()
+	// cache layer for quick data access
+	cache := cache.NewCampaignStore(repo)
+	// campaign mapper to get relevant campaigns for req
+	mapper := mapper.NewCampaignMapper(cache)
+	// http handler layer
+	campaignsHandler := handlers.NewCampaignsHTTPHandler(repo, mapper)
 
-	// Set up HTTP server
+	log.Println("repos initialisations are completed....")
 	router := mux.NewRouter()
-	router.HandleFunc("/v1/delivery", campaignsHandler.FetchCampaigns).Methods(http.MethodGet)
+	router.HandleFunc("/v1/delivery", campaignsHandler.DeliverCampaigns).Methods(http.MethodGet)
 
-	server := &http.Server{
-		Addr:         ":8080",
-		Handler:      router,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  120 * time.Second,
-	}
-
-	log.Printf("Starting campaigns service on %s", server.Addr)
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Could not listen on %s: %v\n", server.Addr, err)
+	log.Printf("starting campaigns service on %s....", port)
+	if err := http.ListenAndServe(port, router); err != nil {
+		log.Fatalf("Could not listen on %s: %v\n", port, err)
 	}
 }
