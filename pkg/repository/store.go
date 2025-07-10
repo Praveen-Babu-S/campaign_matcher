@@ -87,12 +87,31 @@ const (
             }
         ],
         "cta": "Start Free Trial",
-        "campaignStatus": "INACTIVE"
+        "campaignStatus": "ACTIVE"
+    },
+    {
+    "campaignId" : "testcampaignstargetengine",
+    "creatives": [
+            {
+                "imageUrl": "https://somelink_google_1"
+            },
+            {
+                "imageUrl": "https://somelink_google_2"
+            },
+            {
+                "imageUrl": "https://somelink_google_3"
+            }
+        ],
+     "cta": "Start Free Trial",
+    "campaignStatus": "ACTIVE"
     }
 ]`
 
 	JsonRules = `
 [
+	{
+	"campaignId": "testcampaignstargetengine"
+    },
     {
         "campaignId": "spotify",
         "includeCountries": [
@@ -177,13 +196,7 @@ const (
         "excludeAppIDs": [
             "com.burgerking.app"
         ]
-    },
-	{
-	"campaignId": "testcampaignstargetengine",
-	"includeOs" : [
-		"iOS"
-	]
-	}
+    }
 ]
 `
 )

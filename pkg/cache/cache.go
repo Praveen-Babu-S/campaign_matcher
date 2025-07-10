@@ -11,14 +11,14 @@ import (
 
 type ICacher interface {
 	GetCampaign(id string) (models.Campaign, bool)
-	GetRules(id string) (models.TargetingRule, bool)
+	GetRule(id string) (models.ProcessedRule, bool)
 	GetActiveCampaignIds() []string
 }
 
 type CampaignStore struct {
 	Mu                sync.RWMutex // For concurrent access
 	Campaigns         map[string]models.Campaign
-	TargetingRules    map[string]models.TargetingRule // Key is CampaignID
+	TargetingRules    map[string]models.ProcessedRule // Key is CampaignID
 	ActiveCampaignIds []string
 }
 
@@ -31,7 +31,7 @@ func NewCampaignStore(repo repository.Repository) ICacher {
 	cache := &CampsignCacher{
 		Cache: &CampaignStore{
 			Campaigns:         make(map[string]models.Campaign),
-			TargetingRules:    make(map[string]models.TargetingRule),
+			TargetingRules:    make(map[string]models.ProcessedRule),
 			ActiveCampaignIds: make([]string, 0),
 		},
 		repo: repo,
@@ -46,7 +46,7 @@ func NewCampaignStore(repo repository.Repository) ICacher {
 func (c *CampsignCacher) RefreshCache(ctx context.Context) {
 	log.Println("Refreshing cache...")
 	newCampaigns := make(map[string]models.Campaign)
-	newRules := make(map[string]models.TargetingRule)
+	newRules := make(map[string]models.ProcessedRule)
 
 	// fetching from Data Store
 	dbCampaigns, err := c.repo.FetchCampaigns(ctx)
@@ -68,7 +68,8 @@ func (c *CampsignCacher) RefreshCache(ctx context.Context) {
 	}
 
 	for _, rule := range dbRules {
-		newRules[rule.CampaignID] = rule
+		r := models.NewProcessedRule(&rule)
+		newRules[rule.CampaignID] = *r
 	}
 
 	// Safely update the cache
@@ -96,7 +97,7 @@ func (c *CampsignCacher) GetCampaign(id string) (models.Campaign, bool) {
 	return camp, ok
 }
 
-func (c *CampsignCacher) GetRules(id string) (models.TargetingRule, bool) {
+func (c *CampsignCacher) GetRule(id string) (models.ProcessedRule, bool) {
 	c.Cache.Mu.RLock()
 	defer c.Cache.Mu.RUnlock()
 	rule, ok := c.Cache.TargetingRules[id]

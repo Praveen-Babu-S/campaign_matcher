@@ -69,17 +69,17 @@ func (mr *MockICacherMockRecorder) GetCampaign(id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCampaign", reflect.TypeOf((*MockICacher)(nil).GetCampaign), id)
 }
 
-// GetRules mocks base method.
-func (m *MockICacher) GetRules(id string) (models.TargetingRule, bool) {
+// GetRule mocks base method.
+func (m *MockICacher) GetRule(id string) (models.ProcessedRule, bool) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRules", id)
-	ret0, _ := ret[0].(models.TargetingRule)
+	ret := m.ctrl.Call(m, "GetRule", id)
+	ret0, _ := ret[0].(models.ProcessedRule)
 	ret1, _ := ret[1].(bool)
 	return ret0, ret1
 }
 
-// GetRules indicates an expected call of GetRules.
-func (mr *MockICacherMockRecorder) GetRules(id any) *gomock.Call {
+// GetRule indicates an expected call of GetRule.
+func (mr *MockICacherMockRecorder) GetRule(id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRules", reflect.TypeOf((*MockICacher)(nil).GetRules), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRule", reflect.TypeOf((*MockICacher)(nil).GetRule), id)
 }

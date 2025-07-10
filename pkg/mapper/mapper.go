@@ -26,9 +26,12 @@ func (m *CampaignMapper) GetTargetedCampaigns(ctx context.Context, req models.De
 	matchedCampaigns := []models.DeliveryResponse{}
 
 	activeCampaigns := m.Cache.GetActiveCampaignIds()
+	app := strings.ToLower(req.AppID)
+	os := strings.ToLower(req.OS)
+	country := strings.ToLower(req.Country)
 	for _, campaignID := range activeCampaigns {
 		campaign, f1 := m.Cache.GetCampaign(campaignID)
-		rule, f2 := m.Cache.GetRules(campaignID)
+		rule, f2 := m.Cache.GetRule(campaignID)
 		if !f1 {
 			// campaign not found
 			continue
@@ -43,47 +46,43 @@ func (m *CampaignMapper) GetTargetedCampaigns(ctx context.Context, req models.De
 			continue
 		}
 
-		// check if campaign has exclude params matches with req params
-		for _, id := range rule.ExcludeAppIDs {
-			if strings.EqualFold(id, req.AppID) {
+		//check if campaign has exclude params matches with req params
+		if len(rule.ExcludedAppIdsMap) > 0 {
+			if _, ok := rule.ExcludedAppIdsMap[app]; ok {
 				continue
-			}
-		}
-		for _, id := range rule.ExcludeCountries {
-			if strings.EqualFold(id, req.Country) {
-				continue
-			}
-		}
-		for _, id := range rule.ExcludeOS {
-			if strings.EqualFold(id, req.OS) {
-				continue
-			}
-		}
-		includeCountry, includeOS, includeAppId := true, true, true
-		for _, id := range rule.IncludeAppIDs {
-			includeAppId = false
-			if strings.EqualFold(id, req.AppID) {
-				includeAppId = true
-				break
 			}
 		}
 
-		for _, id := range rule.IncludeCountries {
-			includeCountry = false
-			if strings.EqualFold(id, req.Country) {
-				includeCountry = true
-				break
+		if len(rule.ExcludedCountriesMap) > 0 {
+			if _, ok := rule.ExcludedCountriesMap[country]; ok {
+				continue
 			}
 		}
 
-		for _, id := range rule.IncludeOS {
-			includeOS = false
-			if strings.EqualFold(id, req.OS) {
-				includeOS = true
-				break
+		if len(rule.ExcludedOsMap) > 0 {
+			if _, ok := rule.ExcludedOsMap[os]; ok {
+				continue
 			}
 		}
-		if includeCountry && includeOS && includeAppId {
+		include := true
+		if len(rule.IncludedAppIdsMap) > 0 {
+			if _, ok := rule.IncludedAppIdsMap[app]; !ok {
+				include = false
+			}
+		}
+
+		if len(rule.IncludedCountiesMap) > 0 {
+			if _, ok := rule.IncludedCountiesMap[country]; !ok {
+				include = false
+			}
+		}
+
+		if len(rule.IncludedOsMap) > 0 {
+			if _, ok := rule.IncludedOsMap[os]; !ok {
+				include = false
+			}
+		}
+		if include {
 			matchedCampaigns = append(matchedCampaigns, models.DeliveryResponse{
 				CampaignId: campaign.CampaignId,
 				Creatives:  campaign.Creatives,
@@ -91,6 +90,5 @@ func (m *CampaignMapper) GetTargetedCampaigns(ctx context.Context, req models.De
 			})
 		}
 	}
-
 	return matchedCampaigns
 }
