@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	serverPort = flag.String("server.port", ":8081", "http server port")
+	serverPort = flag.String("server.port", ":8081", "http api server port")
 )
 
 func main() {
