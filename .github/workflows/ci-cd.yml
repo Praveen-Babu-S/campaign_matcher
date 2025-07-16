@@ -1,15 +1,9 @@
-name: Go CI/CD Workflow
-
+name: Build Pipeline
 on:
   pull_request:
-
   push:
     branches:
       - main
-
-env:
-  DOCKER_IMAGE_NAME: your-dockerhub-username/your-repo-name
-  DOCKER_REGISTRY: docker.io
 
 jobs:
   test:
@@ -59,8 +53,8 @@ jobs:
           push: true
           tags: |
             ${{ env.DOCKER_IMAGE_NAME }}:latest
-            ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} # Tag with commit SHA for unique versioning
-            ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.date.outputs.now }} # Tag with timestamp
+            ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.date.outputs.now }}
 
       - name: Verify image pushed (optional)
         run: echo "Docker image ${{ env.DOCKER_IMAGE_NAME }}:latest and other tags pushed successfully."
