@@ -30,13 +30,13 @@ jobs:
       - name: Authenticate to Google Cloud (Workload Identity Federation)
         id: 'auth'
         uses: 'google-github-actions/auth@v2'
-        with:
-          # Using secrets for Workload Identity Pool and Provider names
-          workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}/providers/${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}'
-          service_account: 'github-actions-deployer@${{ env.PROJECT_ID }}.iam.gserviceaccount.com' # Construct service account email using PROJECT_ID env var
-        env:
-          WORKLOAD_IDENTITY_POOL: ${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}
-          WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}
+        # with:
+        # Using secrets for Workload Identity Pool and Provider names
+        #   workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}/providers/${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}'
+        #   service_account: 'github-actions-deployer@${{ env.PROJECT_ID }}.iam.gserviceaccount.com' # Construct service account email using PROJECT_ID env var
+        # env:
+        #   WORKLOAD_IDENTITY_POOL: ${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}
+        #   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}
 
 
       - name: Set up Cloud SDK
@@ -55,4 +55,4 @@ jobs:
         with:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.REGION }}
-          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
