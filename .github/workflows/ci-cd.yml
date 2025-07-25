@@ -34,11 +34,9 @@ jobs:
           # Using secrets for Workload Identity Pool and Provider names
           workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}/providers/${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}'
           service_account: 'github-actions-deployer@${{ env.PROJECT_ID }}.iam.gserviceaccount.com' # Construct service account email using PROJECT_ID env var
-        # Note: WORKLOAD_IDENTITY_POOL and WORKLOAD_IDENTITY_PROVIDER env vars are now sourced from secrets in the 'with' block directly
-        # You can remove the env block here, or keep it if you still want them as env vars for other steps:
-        # env:
-        #   WORKLOAD_IDENTITY_POOL: ${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}
-        #   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}
+        env:
+          WORKLOAD_IDENTITY_POOL: ${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}
+          WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}
 
 
       - name: Set up Cloud SDK
