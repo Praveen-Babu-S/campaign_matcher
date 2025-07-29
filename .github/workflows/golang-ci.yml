@@ -1,0 +1,96 @@
+name: Go CI/CD Pipeline
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*.*'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  SERVICE_NAME: ${{ secrets.CLOUD_RUN_SERVICE_NAME }}
+  GAR_REPO: ${{ secrets.GAR_REPOSITORY_NAME }}
+  IMAGE_NAME: ${{ secrets.GAR_IMAGE_NAME }}
+  WORKLOAD_IDENTITY_POOL_NAME: ${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}
+  WORKLOAD_IDENTITY_PROVIDER_NAME: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}
+
+jobs:
+  test:
+    name: Run Go Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.4"
+
+      - name: Download Go Modules
+        run: go mod download
+
+      - name: Run Go Tests
+        run: go test ./...
+
+  build-and-deploy:
+    name: Build and Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    needs: test
+      
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (Workload Identity Federation)
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/${{ env.WORKLOAD_IDENTITY_POOL_NAME }}/providers/${{ env.WORKLOAD_IDENTITY_PROVIDER_NAME }}'
+          service_account: 'github-actions-deployer@${{ env.PROJECT_ID }}.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker to use Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Set Image Tag and Cloud Run Revision
+        id: set_version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+            echo "Using release tag: $VERSION"
+            echo "image_tag=$VERSION" >> $GITHUB_OUTPUT
+            echo "cloud_run_revision_tag=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Using branch tag: master-${{ github.sha }}"
+            echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "cloud_run_revision_tag=master-${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and Push Docker Image to Artifact Registry
+        run: |
+          # Use the 'image_tag' output from the previous 'set_version' step
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMAGE_NAME }}:${{ steps.set_version.outputs.image_tag }} .
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMAGE_NAME }}:${{ steps.set_version.outputs.image_tag }}
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.REGION }}
+          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_REPO }}/${{ env.IMAGE_NAME }}:${{ steps.set_version.outputs.image_tag }}
+          revision_suffix: ${{ steps.set_version.outputs.cloud_run_revision_tag }}
