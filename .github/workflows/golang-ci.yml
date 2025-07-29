@@ -11,11 +11,11 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: ${{ secrets.GCP_REGION }}
-  SERVICE_NAME: ${{ secrets.CLOUD_RUN_SERVICE_NAME }}
-  GAR_REPO: ${{ secrets.GAR_REPOSITORY_NAME }}
-  IMAGE_NAME: ${{ secrets.GAR_IMAGE_NAME }}
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  REGION: ${{ secrets.REGION }}
+  SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+  GAR_REPO: ${{ secrets.REPOSITORY_NAME }}
+  IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
   WORKLOAD_IDENTITY_POOL_NAME: ${{ secrets.WORKLOAD_IDENTITY_POOL_NAME }}
   WORKLOAD_IDENTITY_PROVIDER_NAME: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER_NAME }}
 
